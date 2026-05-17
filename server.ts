@@ -10,57 +10,49 @@ const PORT = 3000;
 // Security & Parsing
 app.use(express.json({ limit: "20mb" }));
 
-// Initialize Gemini
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
-  httpOptions: {
-    headers: {
-      "User-Agent": "aistudio-build",
+// Helper to get Gemini client
+const getGeminiClient = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("SERVER_ERROR: GEMINI_API_KEY is not configured in the environment.");
+  }
+  return new GoogleGenAI({
+    apiKey,
+    httpOptions: {
+      headers: {
+        "User-Agent": "aistudio-build",
+      },
     },
-  },
-});
+  });
+};
 
-// --- API Router for Vercel/Serverless Compatibility ---
+// --- API Router ---
 const apiRouter = express.Router();
 
-apiRouter.get("/test-connection", async (req, res) => {
-  const startTime = Date.now();
-  const apiKey = process.env.GEMINI_API_KEY;
-  
-  if (!apiKey) {
-    return res.status(500).json({ 
-      status: "error", 
-      message: "GEMINI_API_KEY is not configured in the environment.",
-    });
-  }
-
+apiRouter.get("/test-connection", async (_req, res) => {
   try {
+    const ai = getGeminiClient();
     const result = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: "ping",
+      contents: [{ parts: [{ text: "ping" }] }],
     });
-    return res.json({
-      status: "success",
-      duration: Date.now() - startTime,
-      response: result.text,
-    });
+    return res.json({ status: "success", response: result.text });
   } catch (error: any) {
-    return res.status(500).json({
-      status: "error",
-      message: error.message || "Failed to connect to Gemini API.",
-    });
+    console.error("Test Connection Error:", error);
+    return res.status(500).json({ status: "error", message: error.message });
   }
 });
 
 apiRouter.post("/summarize", async (req, res) => {
   const { fileName, mimeType, base64Data } = req.body;
 
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+  if (!fileName || !mimeType || !base64Data) {
+    return res.status(400).json({ error: "Missing required fields: fileName, mimeType, or base64Data" });
   }
 
   try {
-    const response = await ai.models.generateContent({
+    const ai = getGeminiClient();
+    const result = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: [
         {
@@ -72,8 +64,7 @@ apiRouter.post("/summarize", async (req, res) => {
               },
             },
             {
-              text: `당신은 행정 서류 분석 전문가입니다. 
-업로드된 서류(${fileName})를 분석하여 주어진 JSON 스키마에 따라 데이터를 추출하십시오.
+              text: `당신은 행정 서류 분석 전문가입니다. 업로드된 서류(${fileName})를 분석하여 주어진 JSON 스키마에 따라 데이터를 추출하십시오.
 
 [중요 지시사항]
 - 출력은 반드시 순수한 JSON 데이터여야 합니다.
@@ -111,54 +102,45 @@ apiRouter.post("/summarize", async (req, res) => {
       },
     });
 
-    const responseText = response.text;
+    const responseText = result.text;
+    if (!responseText) throw new Error("Empty response from AI");
+    
     return res.json(JSON.parse(responseText));
   } catch (error: any) {
-    console.error("Gemini Error:", error);
+    console.error("Summarize Error:", error);
     return res.status(500).json({ error: error.message || "AI 분석 중 오류가 발생했습니다." });
   }
 });
 
-// Apply API Router
+// Use API Router
 app.use("/api", apiRouter);
 
-// --- Static Client Serving & Vite Integration ---
-async function setupVite() {
-  try {
-    if (process.env.NODE_ENV !== "production") {
-      console.log("Starting Vite in development mode...");
-      const vite = await createViteServer({
-        server: { middlewareMode: true },
-        appType: "spa",
-      });
-      app.use(vite.middlewares);
-      console.log("Vite middleware attached.");
-    } else {
-      console.log("Starting in production mode...");
-      const distPath = path.join(process.cwd(), "dist");
-      app.use(express.static(distPath));
-      app.get("*", (req, res) => {
-        // API routes should not fall through to SPA index
-        if (!req.path.startsWith("/api")) {
-          res.sendFile(path.join(distPath, "index.html"));
-        }
-      });
-    }
-  } catch (error) {
-    console.error("Error setting up Vite:", error);
+// --- Static Client & Vite ---
+async function startApp() {
+  if (process.env.NODE_ENV !== "production") {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distPath = path.join(process.cwd(), "dist");
+    app.use(express.static(distPath));
+    app.get("*", (req, res) => {
+      if (!req.path.startsWith("/api")) {
+        res.sendFile(path.join(distPath, "index.html"));
+      }
+    });
+  }
+
+  // Bind to port
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   }
 }
 
-console.log("Initializing server...");
-setupVite().then(() => {
-  console.log("Vite setup complete, starting listener...");
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
-  });
-}).catch(err => {
-  console.error("Critical server startup error:", err);
-});
+startApp().catch(console.error);
 
-// Export for Vercel
 export default app;
-
