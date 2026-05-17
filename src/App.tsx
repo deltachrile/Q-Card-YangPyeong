@@ -426,9 +426,24 @@ export default function App() {
         }),
       });
 
+      const contentType = response.headers.get('content-type');
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Server error during analysis');
+        let errorMessage = 'Server error during analysis';
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } else {
+          const textError = await response.text();
+          console.error('Non-JSON error response:', textError);
+          errorMessage = `HTTP ${response.status}: 서버에서 잘못된 응답을 받았습니다. API 설정을 확인해주세요.`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.error('Expected JSON but received:', textResponse);
+        throw new Error('서버가 JSON이 아닌 데이터를 반환했습니다. 백엔드 구성을 확인하세요.');
       }
 
       const result = await response.json();
