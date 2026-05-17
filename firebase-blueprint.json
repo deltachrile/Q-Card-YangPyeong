@@ -7,6 +7,7 @@
       "properties": {
         "title": { "type": "string", "description": "The title of the document" },
         "content": { "type": "string", "description": "The summarized content of the document" },
+        "supplementaryInfo": { "type": "string", "description": "Additional supplementary information" },
         "startDate": { "type": "string", "description": "Application start date (YYYY-MM-DD)" },
         "endDate": { "type": "string", "description": "Application end date (YYYY-MM-DD)" },
         "department": { "type": "string", "description": "The department or team responsible" },

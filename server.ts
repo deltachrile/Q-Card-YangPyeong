@@ -93,7 +93,8 @@ async function startServer() {
                        - **반드시** 문장마다 줄바꿈을 포함하여 가독성을 높일 것.
                        - 문장은 "~됨", "~함", "~있음" 과 같은 간결한 개조식으로 끝맺음 할 것.
                        - 가독성을 위해 불필요한 수식어를 제거하고 핵심 위주로 정리할 것.
-                    3. 'startDate' & 'endDate': 문서에서 확인되는 신청 기간의 시작일과 종료일을 'YYYY-MM-DD' 형식으로 각각 추출할 것.
+                    3. 'supplementaryInfo': 핵심 요약 외에 실무자가 참고해야 할 구체적인 신청 방법, 제출 서류, 문의처, 주의사항 등을 상세히 정리할 것.
+                    4. 'startDate' & 'endDate': 문서에서 확인되는 신청 기간의 시작일과 종료일을 'YYYY-MM-DD' 형식으로 각각 추출할 것.
                        만약 기간이 명확하지 않으면 빈 칸으로 둘 것.
                     4. 'isAlwaysOpen': 만약 공고문에 "상시 접수", "수시 접수", "예산 소진 시까지" 등의 표현이 있다면 true로 설정할 것.
                     5. 'hashtags': 검색에 용이한 키워드 4~5개를 '#' 포함하여 추천할 것.
@@ -111,13 +112,14 @@ async function startServer() {
                 properties: {
                   title: { type: Type.STRING },
                   content: { type: Type.STRING },
+                  supplementaryInfo: { type: Type.STRING },
                   startDate: { type: Type.STRING },
                   endDate: { type: Type.STRING },
                   department: { type: Type.STRING },
                   isAlwaysOpen: { type: Type.BOOLEAN },
                   hashtags: { type: Type.ARRAY, items: { type: Type.STRING } },
                 },
-                required: ["title", "content"]
+                required: ["title", "content", "supplementaryInfo"]
               }
             },
           }),

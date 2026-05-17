@@ -88,6 +88,7 @@ interface BusinessData {
   id: string;
   title: string;
   content: string;      /** 통합 요약 내용 */
+  supplementaryInfo: string; /** 추가 보완 정보 */
   startDate: string;    /** 신청 시작일 (YYYY-MM-DD) */
   endDate: string;      /** 신청 종료일 (YYYY-MM-DD) */
   department: string;   /** 부서명 또는 팀명 */
@@ -110,6 +111,7 @@ const INITIAL_DATA: BusinessData[] = [
     id: '1',
     title: '2026년 농림축산식품사업 시행지침서',
     content: '- 농업인, 농업법인, 생산자단체를 대상으로 보조금을 지원함.\n- 농가당 최대 60만원 및 맞춤형 정책자금을 지급함.\n- 지자체 농정부서 방문 또는 온라인 시스템으로 접수함.',
+    supplementaryInfo: '- 신청 방법: 지자체 방문 또는 홈페이지 접수\n- 제출 서류: 사업신청서, 사업계획서, 농업경영체 등록확인서\n- 문의처: 농정지원과 (02-1234-5678)',
     startDate: '2026-01-01',
     endDate: '2026-12-31',
     department: '농정지원과',
@@ -173,6 +175,7 @@ export default function App() {
   const [formData, setFormData] = useState<Omit<BusinessData, 'id' | 'createdAt' | 'comments'>>({
     title: '',
     content: '',
+    supplementaryInfo: '',
     startDate: '',
     endDate: '',
     department: '',
@@ -354,6 +357,7 @@ export default function App() {
       const matchText = (
         item.title + 
         item.content + 
+        (item.supplementaryInfo || '') +
         item.startDate +
         item.endDate +
         (item.department || '') +
@@ -395,7 +399,7 @@ export default function App() {
   const extractWithGemini = async (file: File) => {
     setIsExtracting(true);
     setFormData({ 
-      title: '', content: '', startDate: '', endDate: '', department: '', hashtags: [], editPassword: '', isAlwaysOpen: false
+      title: '', content: '', supplementaryInfo: '', startDate: '', endDate: '', department: '', hashtags: [], editPassword: '', isAlwaysOpen: false
     });
 
     try {
@@ -439,6 +443,7 @@ export default function App() {
       setFormData({
         title: extractedTitle,
         content: processText(result.content || ""),
+        supplementaryInfo: processText(result.supplementaryInfo || ""),
         startDate: result.startDate || "",
         endDate: result.endDate || "",
         department: result.department || "",
@@ -493,6 +498,8 @@ export default function App() {
     if (!formData.isAlwaysOpen && (!formData.startDate.trim() || !formData.endDate.trim())) errors.push('신청 기간');
     if (!formData.department.trim()) errors.push('부서명/팀명');
     if (formData.hashtags.length === 0) errors.push('핵심 키워드');
+    if (!formData.content.trim()) errors.push('핵심 요약 정보');
+    if (!formData.supplementaryInfo.trim()) errors.push('추가 보완 정보');
 
     if (errors.length > 0) {
       setValidationError(`필수 정보가 누락되었습니다: ${errors.join(', ')}`);
@@ -563,6 +570,7 @@ export default function App() {
     setFormData({
       title: '',
       content: '',
+      supplementaryInfo: '',
       startDate: '',
       endDate: '',
       department: '',
@@ -591,6 +599,7 @@ export default function App() {
     setFormData({
       title: item.title,
       content: item.content,
+      supplementaryInfo: item.supplementaryInfo || '',
       startDate: item.startDate,
       endDate: item.endDate,
       department: item.department || '',
@@ -608,6 +617,7 @@ export default function App() {
       setFormData({
         title: selectedItem.title,
         content: selectedItem.content,
+        supplementaryInfo: selectedItem.supplementaryInfo || '',
         startDate: selectedItem.startDate,
         endDate: selectedItem.endDate,
         department: selectedItem.department || '',
@@ -677,6 +687,7 @@ export default function App() {
     setFormData({
       title: item.title,
       content: item.content + commentsText,
+      supplementaryInfo: item.supplementaryInfo || '',
       startDate: '',
       endDate: '',
       department: item.department || '',
@@ -1137,8 +1148,19 @@ export default function App() {
                       value={formData.content}
                       onChange={(e) => setFormData({...formData, content: e.target.value})}
                     />
+                    <p className="text-[9px] text-gray-300 mt-2">사업의 핵심 내용을 개조식으로 요약한 정보입니다.</p>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                    <label className="block text-[10px] font-black text-gray-400 mb-1.5 uppercase tracking-widest">[추가 보완 정보]</label>
+                    <textarea 
+                      className="w-full bg-gray-50/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-xs h-36 resize-none leading-relaxed text-gray-700 font-medium border border-transparent focus:border-blue-100 transition-all whitespace-pre-wrap"
+                      placeholder="신청 방법, 제출 서류, 문의처 등 상세 가이드 내용입니다."
+                      value={formData.supplementaryInfo}
+                      onChange={(e) => setFormData({...formData, supplementaryInfo: e.target.value})}
+                    />
                     <div className="mt-2 flex items-center justify-between gap-4">
-                       <p className="text-[9px] text-gray-300">내용이 길면 스크롤하여 확인하세요.</p>
+                       <p className="text-[9px] text-gray-300">실무에 필요한 추가적인 상세 정보를 입력하세요.</p>
                        <div className="flex items-center gap-2 bg-gray-50/50 px-2 py-1 rounded-lg border border-dashed border-gray-200">
                           <Lock size={12} className="text-gray-400" />
                           <input 
@@ -1397,6 +1419,16 @@ export default function App() {
                         />
                       </div>
 
+                      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                        <label className="text-[10px] font-black text-gray-400 mb-2 block uppercase">[추가 보완 정보]</label>
+                        <textarea 
+                          className="w-full bg-gray-50 rounded-xl px-4 py-4 text-[13px] h-40 resize-none leading-relaxed text-gray-800 font-medium outline-none"
+                          placeholder="신청 방법, 제출 서류 등 상세 안내 내용을 입력하세요."
+                          value={formData.supplementaryInfo}
+                          onChange={(e) => setFormData({...formData, supplementaryInfo: e.target.value})}
+                        />
+                      </div>
+
                       {/* Comments Management in Edit Mode */}
                       <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-4">
                         <label className="text-[10px] font-black text-gray-400 block uppercase">[추가 보완 정보]</label>
@@ -1504,6 +1536,20 @@ export default function App() {
                         <div className="p-7">
                            <div className="text-[16px] leading-[1.8] whitespace-pre-wrap font-bold text-gray-800 tracking-tight">
                              {selectedItem.content}
+                           </div>
+                        </div>
+                      </div>
+
+                      {/* Supplementary Info Card */}
+                      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="bg-amber-50/50 px-6 py-3 border-b border-amber-100/30 flex items-center justify-between">
+                           <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                             <div className="w-1 h-1 bg-amber-600 rounded-full" /> [추가 보완 정보]
+                           </span>
+                        </div>
+                        <div className="p-7">
+                           <div className="text-[13px] leading-[1.8] whitespace-pre-wrap font-medium text-gray-700">
+                             {selectedItem.supplementaryInfo}
                            </div>
                         </div>
                       </div>

@@ -25,9 +25,10 @@ service cloud.firestore {
 
     // Validation Blueprint for Document
     function isValidDocument(data) {
-      return data.keys().hasAll(['title', 'content', 'department', 'createdAt']) &&
+      return data.keys().hasAll(['title', 'content', 'supplementaryInfo', 'department', 'createdAt']) &&
              data.title is string && data.title.size() > 0 && data.title.size() <= 256 &&
              data.content is string && data.content.size() <= 10000 &&
+             data.supplementaryInfo is string && data.supplementaryInfo.size() <= 10000 &&
              data.department is string && data.department.size() <= 128 &&
              data.createdAt is string;
     }
