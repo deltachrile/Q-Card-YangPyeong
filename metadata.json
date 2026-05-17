@@ -1,0 +1,6 @@
+{
+  "name": "큐카드 (Q-Card)",
+  "description": "사업명, 키워드, 어르신들의 스무고개 단어 등 무엇이든 검색해보세요.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

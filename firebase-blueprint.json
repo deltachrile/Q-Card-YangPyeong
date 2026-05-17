@@ -1,0 +1,28 @@
+{
+  "entities": {
+    "Document": {
+      "title": "Public Document Summary",
+      "description": "Information about a government document and its summary.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the document" },
+        "content": { "type": "string", "description": "The summarized content of the document" },
+        "startDate": { "type": "string", "description": "Application start date (YYYY-MM-DD)" },
+        "endDate": { "type": "string", "description": "Application end date (YYYY-MM-DD)" },
+        "department": { "type": "string", "description": "The department or team responsible" },
+        "isAlwaysOpen": { "type": "boolean", "description": "Whether the application is always open" },
+        "hashtags": { "type": "array", "description": "List of keywords or hashtags" },
+        "comments": { "type": "array", "description": "List of comments on the document" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of creation" },
+        "editPassword": { "type": "string", "description": "Optional password for editing" }
+      },
+      "required": ["title", "content", "department", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/qcards/{documentId}": {
+      "schema": "Document",
+      "description": "Collection of document summaries"
+    }
+  }
+}
