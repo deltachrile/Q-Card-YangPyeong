@@ -39,7 +39,11 @@ apiRouter.get("/test-connection", async (_req, res) => {
     return res.json({ status: "success", response: result.text });
   } catch (error: any) {
     console.error("Test Connection Error:", error);
-    return res.status(500).json({ status: "error", message: error.message });
+    let message = error.message;
+    if (message.includes("leaked")) {
+      message = "Gemini API key has been reported as leaked. Please rotate your API key in the 'Settings > Secrets' panel in AI Studio.";
+    }
+    return res.status(500).json({ status: "error", message });
   }
 });
 
@@ -108,7 +112,11 @@ apiRouter.post("/summarize", async (req, res) => {
     return res.json(JSON.parse(responseText));
   } catch (error: any) {
     console.error("Summarize Error:", error);
-    return res.status(500).json({ error: error.message || "AI 분석 중 오류가 발생했습니다." });
+    let errorMsg = error.message || "AI 분석 중 오류가 발생했습니다.";
+    if (errorMsg.includes("leaked")) {
+      errorMsg = "API 키가 유출된 것으로 보고되었습니다. AI Studio의 'Settings > Secrets' 패널에서 새로운 API 키를 설정해주세요.";
+    }
+    return res.status(500).json({ error: errorMsg });
   }
 });
 
