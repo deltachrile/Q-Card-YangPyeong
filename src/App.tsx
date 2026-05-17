@@ -514,7 +514,6 @@ export default function App() {
     if (!formData.department.trim()) errors.push('부서명/팀명');
     if (formData.hashtags.length === 0) errors.push('핵심 키워드');
     if (!formData.content.trim()) errors.push('핵심 요약 정보');
-    if (!formData.supplementaryInfo.trim()) errors.push('추가 보완 정보');
 
     if (errors.length > 0) {
       setValidationError(`필수 정보가 누락되었습니다: ${errors.join(', ')}`);
@@ -763,7 +762,7 @@ export default function App() {
                 큐카드 (Q-Card)
               </h1>
               <p className="text-gray-500 max-w-xl mx-auto font-medium">
-                사업명, 키워드, 어르신들의 스무고개 단어 등 무엇이든 검색해보세요.
+                사업명, 키워드, 지침서 분석 등 무엇이든 검색하고 등록해보세요.
               </p>
             </motion.div>
           )}
@@ -980,8 +979,8 @@ export default function App() {
                     AI
                   </div>
                   <div>
-                    <h2 className="text-lg font-black text-gray-900 tracking-tight leading-none">통합 데이터 자동 추출</h2>
-                    <p className="text-gray-400 text-[10px]">업로드된 파일을 분석하여 핵심 내용을 요약합니다.</p>
+                    <h2 className="text-lg font-black text-gray-900 tracking-tight leading-none">큐카드 생성 (Q-Card)</h2>
+                    <p className="text-gray-400 text-[10px]">업로드된 파일을 분석하여 핵심 내용을 추출합니다.</p>
                   </div>
                 </div>
                 <button onClick={handleCloseModal} className="text-gray-300 hover:text-gray-900 transition-colors p-2">
@@ -1163,19 +1162,8 @@ export default function App() {
                       value={formData.content}
                       onChange={(e) => setFormData({...formData, content: e.target.value})}
                     />
-                    <p className="text-[9px] text-gray-300 mt-2">사업의 핵심 내용을 개조식으로 요약한 정보입니다.</p>
-                  </div>
-
-                  <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                    <label className="block text-[10px] font-black text-gray-400 mb-1.5 uppercase tracking-widest">[추가 보완 정보]</label>
-                    <textarea 
-                      className="w-full bg-gray-50/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-xs h-36 resize-none leading-relaxed text-gray-700 font-medium border border-transparent focus:border-blue-100 transition-all whitespace-pre-wrap"
-                      placeholder="신청 방법, 제출 서류, 문의처 등 상세 가이드 내용입니다."
-                      value={formData.supplementaryInfo}
-                      onChange={(e) => setFormData({...formData, supplementaryInfo: e.target.value})}
-                    />
                     <div className="mt-2 flex items-center justify-between gap-4">
-                       <p className="text-[9px] text-gray-300">실무에 필요한 추가적인 상세 정보를 입력하세요.</p>
+                       <p className="text-[9px] text-gray-300">사업의 핵심 내용을 개조식으로 요약한 정보입니다.</p>
                        <div className="flex items-center gap-2 bg-gray-50/50 px-2 py-1 rounded-lg border border-dashed border-gray-200">
                           <Lock size={12} className="text-gray-400" />
                           <input 
@@ -1434,19 +1422,9 @@ export default function App() {
                         />
                       </div>
 
-                      <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                        <label className="text-[10px] font-black text-gray-400 mb-2 block uppercase">[추가 보완 정보]</label>
-                        <textarea 
-                          className="w-full bg-gray-50 rounded-xl px-4 py-4 text-[13px] h-40 resize-none leading-relaxed text-gray-800 font-medium outline-none"
-                          placeholder="신청 방법, 제출 서류 등 상세 안내 내용을 입력하세요."
-                          value={formData.supplementaryInfo}
-                          onChange={(e) => setFormData({...formData, supplementaryInfo: e.target.value})}
-                        />
-                      </div>
-
                       {/* Comments Management in Edit Mode */}
                       <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-4">
-                        <label className="text-[10px] font-black text-gray-400 block uppercase">[추가 보완 정보]</label>
+                        <label className="text-[10px] font-black text-gray-400 block uppercase">[추가 의견 및 메모]</label>
                         <div className="space-y-2">
                           {selectedItem?.comments && selectedItem.comments.length > 0 ? (
                             selectedItem.comments.map(comment => (
@@ -1555,24 +1533,10 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Supplementary Info Card */}
-                      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="bg-amber-50/50 px-6 py-3 border-b border-amber-100/30 flex items-center justify-between">
-                           <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
-                             <div className="w-1 h-1 bg-amber-600 rounded-full" /> [추가 보완 정보]
-                           </span>
-                        </div>
-                        <div className="p-7">
-                           <div className="text-[13px] leading-[1.8] whitespace-pre-wrap font-medium text-gray-700">
-                             {selectedItem.supplementaryInfo}
-                           </div>
-                        </div>
-                      </div>
-
                       {/* Collaborative Section (Dense) */}
                       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 space-y-4">
                         <h4 className="text-sm font-black text-gray-900 flex items-center gap-2">
-                          <Hash size={14} className="text-blue-600" /> [추가 보완 정보]
+                          <Hash size={14} className="text-blue-600" /> [추가 의견 및 메모]
                         </h4>
                         
                         <div className="space-y-3">
@@ -1602,7 +1566,7 @@ export default function App() {
 
                         <div className="flex gap-2">
                           <input 
-                            placeholder="보완 정보(담당자 연락처, 주의사항 등) 입력..."
+                            placeholder="의견 및 참고 정보(담당자 연락처, 주의사항 등) 입력..."
                             className="flex-1 bg-gray-50 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all"
                             value={commentInput}
                             onChange={(e) => setCommentInput(e.target.value)}

@@ -78,11 +78,10 @@ apiRouter.post("/summarize", async (req, res) => {
 [추출 필드 가이드]
 1. 'title': 문서의 공식 사업 명칭.
 2. 'content': 실무자가 파악하기 좋게 핵심 내용을 간결한 개조식(~임, ~함)으로 요약. 문장마다 줄바꿈(\n) 포함.
-3. 'supplementaryInfo': 신청 방법, 제출 서류, 문의처 등 상세 가이드 정보.
-4. 'startDate' & 'endDate': 'YYYY-MM-DD' 형식. 불분명하면 빈 문자열.
-5. 'isAlwaysOpen': 상시/수시 접수 여부 (boolean).
-6. 'department': 담당 부서/팀 명칭.
-7. 'hashtags': 핵심 키워드 4~5개 (배열).`,
+3. 'startDate' & 'endDate': 'YYYY-MM-DD' 형식. 불분명하면 빈 문자열.
+4. 'isAlwaysOpen': 상시/수시 접수 여부 (boolean).
+5. 'department': 담당 부서/팀 명칭.
+6. 'hashtags': 핵심 키워드 4~5개 (배열).`,
             },
           ],
         },
@@ -94,14 +93,13 @@ apiRouter.post("/summarize", async (req, res) => {
           properties: {
             title: { type: Type.STRING },
             content: { type: Type.STRING },
-            supplementaryInfo: { type: Type.STRING },
             startDate: { type: Type.STRING },
             endDate: { type: Type.STRING },
             department: { type: Type.STRING },
             isAlwaysOpen: { type: Type.BOOLEAN },
             hashtags: { type: Type.ARRAY, items: { type: Type.STRING } },
           },
-          required: ["title", "content", "supplementaryInfo"],
+          required: ["title", "content"],
         },
       },
     });
